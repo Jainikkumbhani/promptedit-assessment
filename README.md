@@ -2,7 +2,7 @@
 
 An image generation app on top of **Pixelforge**, built with Laravel 12, Vue 3 and Inertia 2. Users write a prompt, see the price before they submit, watch the image arrive live, and pay the exact Pixelforge cost plus a 25% markup. Failed generations cost nothing.
 
-- **Live app:** _add your deployed URL_
+- **Live app:** https://promptedit-studio.onrender.com (free Render instance: the first request after 15 idle minutes takes ~30–60s)
 - **Pixelforge account:** _add your Pixelforge email_
 
 Both stretch goals are included: **credit balances** (with a demo "Buy credits") and an **operator report** that reconciles against `GET /v1/usage`.
