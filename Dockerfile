@@ -15,7 +15,10 @@ RUN npm run build
 
 # ---- 3. Runtime: FrankenPHP (Caddy + PHP 8.4) -----------------------------
 FROM dunglas/frankenphp:1-php8.4
-RUN install-php-extensions pdo_pgsql pdo_sqlite bcmath intl pcntl opcache
+RUN install-php-extensions pdo_pgsql pdo_sqlite bcmath intl pcntl opcache \
+    # The image grants frankenphp cap_net_bind_service (to bind port 80). Hosts that
+    # forbid file capabilities (Render) then refuse to exec it; we listen on 8080.
+    && setcap -r /usr/local/bin/frankenphp
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
