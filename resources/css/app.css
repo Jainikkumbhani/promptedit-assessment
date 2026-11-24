@@ -1,0 +1,163 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body,
+html {
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+@layer base {
+    :root {
+        --background: 240 20% 99%;
+        --foreground: 240 10% 6%;
+        --card: 0 0% 100%;
+        --card-foreground: 240 10% 6%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 240 10% 6%;
+        --primary: 262 83% 58%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 240 10% 95%;
+        --secondary-foreground: 240 10% 10%;
+        --muted: 240 10% 96%;
+        --muted-foreground: 240 5% 42%;
+        --accent: 262 60% 96%;
+        --accent-foreground: 262 60% 30%;
+        --destructive: 0 75% 55%;
+        --destructive-foreground: 0 0% 98%;
+        --success: 152 60% 38%;
+        --warning: 35 90% 48%;
+        --border: 240 8% 90%;
+        --input: 240 8% 88%;
+        --ring: 262 83% 58%;
+        --chart-1: 262 83% 58%;
+        --chart-2: 189 85% 42%;
+        --chart-3: 152 60% 40%;
+        --chart-4: 35 90% 55%;
+        --chart-5: 320 80% 58%;
+        --radius: 0.75rem;
+        --sidebar-background: 240 20% 98%;
+        --sidebar-foreground: 240 6% 26%;
+        --sidebar-primary: 262 83% 58%;
+        --sidebar-primary-foreground: 0 0% 100%;
+        --sidebar-accent: 262 60% 95%;
+        --sidebar-accent-foreground: 262 50% 30%;
+        --sidebar-border: 240 8% 91%;
+        --sidebar-ring: 262 83% 58%;
+    }
+
+    .dark {
+        --background: 240 18% 4%;
+        --foreground: 240 10% 96%;
+        --card: 240 16% 7%;
+        --card-foreground: 240 10% 96%;
+        --popover: 240 16% 8%;
+        --popover-foreground: 240 10% 96%;
+        --primary: 263 90% 68%;
+        --primary-foreground: 240 20% 6%;
+        --secondary: 240 12% 13%;
+        --secondary-foreground: 240 10% 96%;
+        --muted: 240 12% 11%;
+        --muted-foreground: 240 6% 62%;
+        --accent: 263 40% 16%;
+        --accent-foreground: 263 90% 88%;
+        --destructive: 0 80% 62%;
+        --destructive-foreground: 0 0% 98%;
+        --success: 152 65% 50%;
+        --warning: 38 95% 60%;
+        --border: 240 10% 15%;
+        --input: 240 10% 17%;
+        --ring: 263 90% 68%;
+        --chart-1: 263 90% 68%;
+        --chart-2: 189 90% 55%;
+        --chart-3: 152 65% 50%;
+        --chart-4: 38 95% 60%;
+        --chart-5: 320 85% 65%;
+        --sidebar-background: 240 18% 5%;
+        --sidebar-foreground: 240 8% 85%;
+        --sidebar-primary: 263 90% 68%;
+        --sidebar-primary-foreground: 240 20% 6%;
+        --sidebar-accent: 263 30% 14%;
+        --sidebar-accent-foreground: 263 90% 90%;
+        --sidebar-border: 240 10% 12%;
+        --sidebar-ring: 263 90% 68%;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+    }
+}
+
+@layer components {
+    /* Soft moving aurora behind the app. */
+    .aurora {
+        @apply pointer-events-none fixed inset-0 -z-10 overflow-hidden;
+    }
+    .aurora::before,
+    .aurora::after {
+        content: '';
+        @apply absolute rounded-full opacity-40 blur-3xl dark:opacity-30;
+        width: 42rem;
+        height: 42rem;
+    }
+    .aurora::before {
+        background: radial-gradient(circle, hsl(263 90% 65% / 0.55), transparent 65%);
+        top: -18rem;
+        right: -10rem;
+        animation: drift 18s ease-in-out infinite alternate;
+    }
+    .aurora::after {
+        background: radial-gradient(circle, hsl(189 90% 55% / 0.4), transparent 65%);
+        bottom: -22rem;
+        left: -12rem;
+        animation: drift 22s ease-in-out infinite alternate-reverse;
+    }
+
+    .glass {
+        @apply rounded-2xl border border-border/70 bg-card/70 shadow-[0_1px_0_0_hsl(0_0%_100%/0.04)_inset,0_20px_50px_-24px_hsl(263_60%_20%/0.35)] backdrop-blur-xl;
+    }
+
+    .text-gradient {
+        @apply bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-300 bg-clip-text text-transparent;
+    }
+
+    .btn-glow {
+        @apply relative isolate overflow-hidden bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 bg-[length:200%_100%] text-white shadow-lg shadow-violet-600/30 transition-all duration-500 hover:bg-[position:100%_0] hover:shadow-fuchsia-600/40 disabled:opacity-60 disabled:shadow-none;
+    }
+
+    /* Shimmering placeholder while Pixelforge is painting. */
+    .shimmer {
+        background: linear-gradient(110deg, hsl(var(--muted)) 8%, hsl(263 40% 30% / 0.35) 18%, hsl(var(--muted)) 33%);
+        background-size: 200% 100%;
+        animation: shimmer 1.6s linear infinite;
+    }
+
+    .font-mono {
+        font-family: var(--font-mono);
+        font-feature-settings: 'tnum';
+    }
+}
+
+@keyframes drift {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to { transform: translate3d(-6rem, 4rem, 0) scale(1.15); }
+}
+
+@keyframes shimmer {
+    to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+}
