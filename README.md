@@ -91,12 +91,15 @@ php artisan schedule:work         # polling fallback
 
 Set `PIXELFORGE_API_KEY` and `PIXELFORGE_WEBHOOK_SECRET` from a **local** Pixelforge key. To receive webhooks, expose the app with a tunnel (for example `cloudflared tunnel --url http://localhost:8000`) and set the key's webhook URL to `https://<tunnel>/webhooks/pixelforge`.
 
-## Deploying (Laravel Cloud)
+## Deploying (Render, free plan)
 
-1. Create the app from this repository, and add a database (Postgres or MySQL).
-2. Environment: `PIXELFORGE_API_KEY` and `PIXELFORGE_WEBHOOK_SECRET` from a **separate deployed** Pixelforge key, plus `ADMIN_EMAILS` and `QUEUE_CONNECTION=database`.
-3. Enable a **queue worker** and the **scheduler**. Deploy commands: `php artisan migrate --force`.
-4. In Pixelforge, set that key's webhook URL to `https://<your-app>/webhooks/pixelforge` and press "Send test event".
+The repo ships a `Dockerfile` (FrankenPHP, PHP 8.4) and a `render.yaml` Blueprint.
+
+1. Render dashboard: **New > Blueprint**, then pick this repository. It creates the web service and a Postgres database, and generates `APP_KEY`.
+2. Fill in the three secret variables it asks for: `PIXELFORGE_API_KEY` and `PIXELFORGE_WEBHOOK_SECRET` (from a **separate deployed** Pixelforge key), and `ADMIN_EMAILS`.
+3. In Pixelforge, set that key's webhook URL to `https://<service>.onrender.com/webhooks/pixelforge` and press "Send test event".
+
+`docker/start.sh` caches config, runs migrations, then starts the **queue worker** and the **scheduler** next to the web server, so a single free instance runs everything. A free instance sleeps after 15 idle minutes. Pixelforge retries webhooks that arrive during the cold start, and the polling fallback catches anything they miss.
 
 ## Where things live
 
