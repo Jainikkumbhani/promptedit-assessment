@@ -10,12 +10,9 @@ use App\Support\Money;
 use Illuminate\Support\Facades\DB;
 
 /**
- * The only place that changes a user's balance. Every change is an append-only
- * transaction row written in the same database transaction as the balance update,
- * with the user row locked so concurrent requests can't overspend.
- *
- * Per generation, each type (hold, hold_release, charge) can be written once:
- * we check under the lock, and a unique index backs that up.
+ * All balance changes go through here. Each one is a row in credit_transactions,
+ * written with the user row locked. hold / hold_release / charge can only happen
+ * once per generation (checked under the lock + unique index).
  */
 class CreditLedger
 {
@@ -29,13 +26,11 @@ class CreditLedger
         return $this->record($user, Type::Purchase, $amount, 'Bought credits (demo purchase)');
     }
 
-    /** Reserve the worst-case cost so a user can never end up below zero. */
     public function hold(Generation $generation): void
     {
         $this->record($generation->user, Type::Hold, $generation->maxCost()->negate(), 'Reserved for generation', $generation);
     }
 
-    /** Give the hold back without charging (the generation failed). */
     public function release(Generation $generation): void
     {
         if ($this->hasEntry($generation, Type::Hold)) {
@@ -43,7 +38,6 @@ class CreditLedger
         }
     }
 
-    /** Release the hold and charge the actual cost. */
     public function settle(Generation $generation, Money $charge): void
     {
         DB::transaction(function () use ($generation, $charge) {
@@ -63,7 +57,7 @@ class CreditLedger
             $locked = User::whereKey($user->getKey())->lockForUpdate()->firstOrFail();
 
             if ($generation && $this->hasEntry($generation, $type)) {
-                return null; // already recorded: replays are no-ops
+                return null; // already recorded
             }
 
             $locked->balance_nanos += $amount->nanos;

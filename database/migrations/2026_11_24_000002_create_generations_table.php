@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('generations', function (Blueprint $table) {
-            // Our own id doubles as the Pixelforge Idempotency-Key and metadata.generation_id.
+            // also used as Idempotency-Key + metadata.generation_id
             $table->ulid('id')->primary();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('pixelforge_id')->nullable()->unique();
@@ -22,11 +22,11 @@ return new class extends Migration
             $table->string('quality');
             $table->json('reference_images');
 
-            // All money is stored as integer nanodollars.
-            $table->bigInteger('estimated_cost_nanos');            // typical price shown up front
-            $table->bigInteger('max_cost_nanos');                  // worst case; this is what we hold
-            $table->bigInteger('provider_cost_nanos')->nullable(); // what Pixelforge billed us
-            $table->bigInteger('charged_nanos')->nullable();       // what the user actually paid
+            // money in nanodollars
+            $table->bigInteger('estimated_cost_nanos');
+            $table->bigInteger('max_cost_nanos'); // held while running
+            $table->bigInteger('provider_cost_nanos')->nullable();
+            $table->bigInteger('charged_nanos')->nullable();
 
             $table->json('rates')->nullable();
             $table->json('usage')->nullable();
@@ -37,11 +37,10 @@ return new class extends Migration
             $table->string('error_code')->nullable();
             $table->text('error_message')->nullable();
 
-            // Shown while we wait out a rate/concurrency limit before Pixelforge accepts it.
             $table->string('retry_reason')->nullable();
             $table->unsignedSmallInteger('submit_attempts')->default(0);
 
-            // Pixelforge's own timestamps (UTC). completed_at decides the billing day.
+            // completed_at = billing day
             $table->timestamp('provider_created_at')->nullable();
             $table->timestamp('started_at')->nullable();
             $table->timestamp('completed_at')->nullable()->index();

@@ -1,6 +1,5 @@
 import { onBeforeUnmount, ref, watch, type Ref } from 'vue';
 
-/** Smoothly counts towards a changing number (easeOutExpo), for prices and balances. */
 export function useAnimatedNumber(source: Ref<number>, duration = 650) {
     const display = ref(source.value);
     let frame = 0;

@@ -10,7 +10,6 @@ return new class extends Migration
     {
         Schema::create('webhook_events', function (Blueprint $table) {
             $table->id();
-            // The unique index is what makes a redelivered event a no-op.
             $table->string('event_id')->unique();
             $table->string('type');
             $table->string('pixelforge_generation_id')->nullable()->index();

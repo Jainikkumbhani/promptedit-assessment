@@ -1,13 +1,8 @@
-/**
- * Money arrives from the server as integer nanodollars. We format it with integer
- * arithmetic only, so the UI never shows a float-rounded amount.
- */
+// Amounts come in as integer nanodollars.
 const NANOS_PER_DOLLAR = 1_000_000_000;
 
 interface FormatOptions {
-    /** Fewest decimals to show (default 2). */
     minDecimals?: number;
-    /** Most decimals to show (default 9: exact). Fewer rounds half-up, for display only. */
     maxDecimals?: number;
 }
 
@@ -33,7 +28,6 @@ export function formatUsd(nanos: number | null | undefined, { minDecimals = 2, m
     return `${negative ? '−' : ''}$${whole}${fraction ? '.' + fraction : ''}`;
 }
 
-/** The exact amount, all nine decimals, for tooltips. */
 export function exactUsd(nanos: number | null | undefined): string {
     if (nanos === null || nanos === undefined) {
         return '—';

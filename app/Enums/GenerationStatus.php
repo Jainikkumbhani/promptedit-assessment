@@ -4,17 +4,14 @@ namespace App\Enums;
 
 enum GenerationStatus: string
 {
-    /** Saved locally; we're still getting Pixelforge to accept it (retrying limits/overloads). */
+    // Saved locally, not accepted by Pixelforge yet.
     case Submitting = 'submitting';
     case Queued = 'queued';
     case Processing = 'processing';
     case Succeeded = 'succeeded';
     case Failed = 'failed';
 
-    /**
-     * How far along the lifecycle a status is. A generation only ever moves to a
-     * higher rank, which is how out-of-order webhooks are made harmless.
-     */
+    // Status only moves to a higher rank, so late/out-of-order webhooks are ignored.
     public function rank(): int
     {
         return match ($this) {

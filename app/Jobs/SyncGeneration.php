@@ -11,9 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 
-/**
- * Polls one generation. The safety net for webhooks that never arrive.
- */
+// Polling fallback for webhooks that never arrive.
 class SyncGeneration implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;
@@ -40,7 +38,6 @@ class SyncGeneration implements ShouldBeUnique, ShouldQueue
         try {
             $generations->applyRemoteState($generation, $pixelforge->getGeneration($generation->pixelforge_id));
         } catch (PixelforgeException $e) {
-            // Polling is best effort; the next sync (or a webhook) will catch up.
             Log::info('Generation sync failed.', ['generation' => $generation->id, 'code' => $e->errorCode]);
         }
     }

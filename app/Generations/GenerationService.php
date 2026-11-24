@@ -16,9 +16,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Owns a generation's lifecycle. Webhooks, polling and the submit job all feed
- * Pixelforge's view of a generation into applyRemoteState(), so there is exactly
- * one place that decides status changes and money.
+ * Webhooks, polling and the submit job all end up in applyRemoteState(),
+ * so status changes and billing happen in one place.
  */
 class GenerationService
 {
@@ -29,10 +28,9 @@ class GenerationService
     ) {}
 
     /**
-     * Price the request, hold the worst case from the user's balance and queue the
-     * submission. Throws InsufficientCredits when the user can't afford the worst case.
-     *
      * @param  list<string>  $referenceImages
+     *
+     * @throws InsufficientCredits
      */
     public function start(User $user, string $prompt, string $size, string $quality, array $referenceImages): Generation
     {
@@ -66,12 +64,7 @@ class GenerationService
         return $generation;
     }
 
-    /**
-     * Bring our record in line with a generation object from Pixelforge (from the
-     * create response, a webhook or polling). Safe to call any number of times, in
-     * any order: status only ever moves forward, final states never change, and
-     * money is recorded once.
-     */
+    // Idempotent: safe to call repeatedly and in any order.
     public function applyRemoteState(Generation $generation, array $remote): Generation
     {
         return DB::transaction(function () use ($generation, $remote) {
@@ -84,7 +77,7 @@ class GenerationService
             $incoming = GenerationStatus::tryFrom($remote['status'] ?? '');
 
             if ($incoming === null || ! $current->status->canMoveTo($incoming)) {
-                // Stale or duplicate news (e.g. a retried "processing" after "succeeded").
+                // stale or duplicate event
                 $current->save();
 
                 return $current;
@@ -109,7 +102,6 @@ class GenerationService
         });
     }
 
-    /** Pixelforge never accepted it (blocked, invalid, or we ran out of retries). Not charged. */
     public function failBeforeAcceptance(Generation $generation, string $code, string $message): void
     {
         DB::transaction(function () use ($generation, $code, $message) {
@@ -144,7 +136,6 @@ class GenerationService
         $this->ledger->settle($generation, $charge);
 
         if ($charge->greaterThan($generation->maxCost())) {
-            // Shouldn't happen if Pixelforge stays within its published ranges; worth knowing if it does.
             Log::warning('Generation cost exceeded its hold.', ['generation' => $generation->id, 'charge' => $charge->toDecimal()]);
         }
     }

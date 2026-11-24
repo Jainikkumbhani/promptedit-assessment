@@ -64,7 +64,6 @@ class User extends Authenticatable
         return Money::nanos($this->balance_nanos);
     }
 
-    /** Operators are configured by email (ADMIN_EMAILS), not stored in the database. */
     public function isAdmin(): bool
     {
         return in_array(strtolower($this->email), config('billing.admin_emails'), true);

@@ -16,14 +16,13 @@ return new class extends Migration
             // signup_bonus | purchase | hold | hold_release | charge
             $table->string('type');
 
-            // Signed nanodollars: positive adds credit, negative spends it.
+            // signed nanodollars
             $table->bigInteger('amount_nanos');
             $table->bigInteger('balance_after_nanos');
             $table->string('description');
             $table->timestamps();
 
-            // A generation can be held, released and charged at most once each,
-            // so a duplicated webhook can never bill twice.
+            // each step once per generation -> no double charge
             $table->unique(['generation_id', 'type']);
             $table->index(['user_id', 'created_at']);
         });

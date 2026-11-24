@@ -10,15 +10,10 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 
-/**
- * Receives Pixelforge webhooks: verify, store once per event id, answer fast,
- * and apply the event in a queued job.
- */
 class PixelforgeWebhookController
 {
     public function __invoke(Request $request, WebhookSignature $signature): Response|JsonResponse
     {
-        // Verify against the raw body, before any JSON decoding.
         $payload = $request->getContent();
 
         if (! $signature->isValid($payload, $request->header('Pixelforge-Signature'))) {
@@ -33,7 +28,7 @@ class PixelforgeWebhookController
             return response()->json(['error' => 'Malformed event.'], 400);
         }
 
-        // The unique index on event_id makes a redelivery a no-op.
+        // unique event_id = dedupe
         $isNew = WebhookEvent::query()->insertOrIgnore([
             'event_id' => $event['id'],
             'type' => $event['type'],
@@ -46,8 +41,7 @@ class PixelforgeWebhookController
 
         $stored = WebhookEvent::where('event_id', $event['id'])->first();
 
-        // Dispatch for new events, and again for a duplicate we never finished
-        // (e.g. the queue was down the first time). The job itself is idempotent.
+        // Re-dispatch unfinished duplicates too (e.g. queue was down the first time).
         if ($isNew || ! $stored->processed_at) {
             ProcessWebhookEvent::dispatch($stored->id);
         }

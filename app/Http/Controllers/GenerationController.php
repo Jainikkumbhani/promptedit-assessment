@@ -25,7 +25,6 @@ class GenerationController
         private readonly GenerationService $generations,
     ) {}
 
-    /** The studio: prompt form, live estimate and the latest generations. */
     public function studio(Request $request): Response
     {
         $recent = $request->user()->generations()->latest()->limit(12)->get();
@@ -47,7 +46,6 @@ class GenerationController
         ]);
     }
 
-    /** Full history with estimated vs actual cost. */
     public function index(Request $request): Response
     {
         $user = $request->user();
@@ -95,7 +93,6 @@ class GenerationController
         return back()->with('success', 'Sent to Pixelforge. Your image will appear below.');
     }
 
-    /** Live price for the form as the user types. */
     public function estimate(GenerationRequest $request, PriceCalculator $prices): JsonResponse
     {
         $estimate = $prices->estimate(
@@ -109,7 +106,6 @@ class GenerationController
         return response()->json($estimate->toArray());
     }
 
-    /** "Check now": poll Pixelforge for one generation immediately. */
     public function sync(Request $request, Generation $generation): RedirectResponse
     {
         abort_unless($generation->user_id === $request->user()->id, 404);
@@ -119,12 +115,7 @@ class GenerationController
         return back();
     }
 
-    /**
-     * While the user watches, nudge generations we haven't heard about recently.
-     * Cheap insurance on top of webhooks and the scheduled sync.
-     *
-     * @param  Collection<int, Generation>  $generations
-     */
+    /** @param  Collection<int, Generation>  $generations */
     private function pollStale(Collection $generations): void
     {
         $generations

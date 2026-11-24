@@ -8,10 +8,6 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
-/**
- * Thin wrapper around the Pixelforge HTTP API. Every failure becomes a
- * PixelforgeException with the documented error code.
- */
 class PixelforgeClient
 {
     public function __construct(
@@ -20,10 +16,6 @@ class PixelforgeClient
         private readonly int $timeout = 15,
     ) {}
 
-    /**
-     * Current rates and token rules. Public and changes rarely, so cached briefly.
-     * Each generation is still billed at the rates returned on the generation itself.
-     */
     public function pricing(): PricingTable
     {
         $data = Cache::remember('pixelforge:pricing', now()->addMinutes(5), function () {
@@ -33,10 +25,6 @@ class PixelforgeClient
         return PricingTable::fromApi($data);
     }
 
-    /**
-     * POST /v1/generations. The idempotency key makes retries after a timeout or
-     * overload safe: Pixelforge returns the same generation instead of a new one.
-     */
     public function createGeneration(array $params, string $idempotencyKey): array
     {
         return $this->send(fn () => $this->http()
@@ -49,7 +37,6 @@ class PixelforgeClient
         return $this->send(fn () => $this->http()->get('/generations/'.rawurlencode($pixelforgeId)));
     }
 
-    /** GET /v1/usage: what Pixelforge billed this key, per UTC day (inclusive range). */
     public function usage(string $startDate, string $endDate): array
     {
         return $this->send(fn () => $this->http()->get('/usage', [

@@ -12,12 +12,8 @@ use Illuminate\Foundation\Queue\Queueable;
 use Throwable;
 
 /**
- * Gets Pixelforge to accept a generation.
- *
- * Rate limits, the concurrency limit and overloads mean "nothing was created, try
- * later": we wait at least Retry-After, back off further each time, and give up
- * after MAX_ATTEMPTS. Our generation id is the Idempotency-Key, so a retry after a
- * timeout can never create a second (billable) generation.
+ * 429/503 -> retry after Retry-After with backoff, give up after MAX_ATTEMPTS.
+ * Our id is the Idempotency-Key, so retries can't create a second generation.
  */
 class SubmitGeneration implements ShouldQueue
 {
@@ -34,7 +30,7 @@ class SubmitGeneration implements ShouldQueue
         $generation = Generation::find($this->generationId);
 
         if (! $generation || $generation->status !== GenerationStatus::Submitting) {
-            return; // already accepted (maybe a webhook beat us here) or already failed
+            return; // a webhook may have got here first
         }
 
         $generation->increment('submit_attempts');
@@ -61,7 +57,6 @@ class SubmitGeneration implements ShouldQueue
         }
     }
 
-    /** Called by the queue if the job crashed for an unexpected reason too many times. */
     public function failed(?Throwable $e): void
     {
         $generation = Generation::find($this->generationId);
@@ -75,7 +70,6 @@ class SubmitGeneration implements ShouldQueue
         }
     }
 
-    /** At least Retry-After, growing exponentially (2, 4, 8, ... capped at 60s), plus jitter. */
     private function backoffSeconds(PixelforgeException $e): int
     {
         $exponential = min(60, 2 ** $this->attempts());

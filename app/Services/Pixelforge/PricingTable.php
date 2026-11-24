@@ -4,10 +4,6 @@ namespace App\Services\Pixelforge;
 
 use InvalidArgumentException;
 
-/**
- * GET /v1/pricing, as a typed object. Sizes and qualities are read from the
- * output-token table, so the UI offers exactly what Pixelforge supports.
- */
 final readonly class PricingTable
 {
     /**
@@ -31,7 +27,7 @@ final readonly class PricingTable
         return new self(
             rates: array_map('strval', $data['rates']),
             charactersPerTextToken: (int) $tokens['characters_per_text_token'],
-            // 0.15 -> 1500 basis points, so the rest of the maths stays in integers.
+            // 0.15 -> 1500 bps to keep the maths in integers
             textVarianceBasisPoints: (int) round(((float) $tokens['text_token_variance']) * 10_000),
             tokensPerReferenceImage: (int) $tokens['per_reference_image'],
             outputTokens: $tokens['output'],

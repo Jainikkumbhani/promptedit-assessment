@@ -277,9 +277,7 @@ useLiveReload(anyActive, ['generations', 'auth']);
                             </div>
                         </TransitionGroup>
                         <p v-if="!form.reference_images.length" class="text-[11px] text-muted-foreground">
-                            Guide the style with up to {{ limits.reference_images }} image URLs ({{
-                                pricing?.tokens_per_reference_image ?? 765
-                            }}
+                            Guide the style with up to {{ limits.reference_images }} image URLs ({{ pricing?.tokens_per_reference_image ?? 765 }}
                             tokens each).
                         </p>
                         <p

@@ -8,10 +8,6 @@ use App\Models\WebhookEvent;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
-/**
- * Applies a stored webhook event. The controller already deduplicated by event id;
- * this job is also safe to run twice because applyRemoteState is idempotent.
- */
 class ProcessWebhookEvent implements ShouldQueue
 {
     use Queueable;
@@ -38,8 +34,7 @@ class ProcessWebhookEvent implements ShouldQueue
             return;
         }
 
-        // Match by Pixelforge id, or by our own id in metadata: a webhook can arrive
-        // before the POST that created the generation has even returned.
+        // Webhook can arrive before our POST returns, so also match on metadata.
         $generation = Generation::query()
             ->where('pixelforge_id', $remote['id'] ?? '')
             ->when($remote['metadata']['generation_id'] ?? null, fn ($q, $id) => $q->orWhere('id', $id))

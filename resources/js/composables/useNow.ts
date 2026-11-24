@@ -1,6 +1,5 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 
-/** A ticking "now", for elapsed-time labels. */
 export function useNow(intervalMs = 1000) {
     const now = ref(Date.now());
     let timer: ReturnType<typeof setInterval> | undefined;

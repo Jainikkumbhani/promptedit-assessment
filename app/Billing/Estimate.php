@@ -4,9 +4,6 @@ namespace App\Billing;
 
 use App\Support\Money;
 
-/**
- * An up-front price, in user dollars (markup included).
- */
 final readonly class Estimate
 {
     /** @param  array<string, string>  $rates */

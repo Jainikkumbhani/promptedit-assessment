@@ -59,7 +59,6 @@ class Generation extends Model
             && ($this->image_url_expires_at === null || $this->image_url_expires_at->isFuture());
     }
 
-    /** What the UI needs, with money as integer nanodollars. */
     public function toClientArray(): array
     {
         return [

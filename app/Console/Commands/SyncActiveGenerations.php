@@ -8,10 +8,6 @@ use App\Jobs\SyncGeneration;
 use App\Models\Generation;
 use Illuminate\Console\Command;
 
-/**
- * The polling safety net: webhooks are at-least-once but not guaranteed, so every
- * minute we ask Pixelforge about generations we haven't heard about in a while.
- */
 class SyncActiveGenerations extends Command
 {
     protected $signature = 'generations:sync {--quiet-for=30 : Only poll generations not updated for this many seconds}';
@@ -30,7 +26,7 @@ class SyncActiveGenerations extends Command
 
         $stale->each(fn (string $id) => SyncGeneration::dispatch($id));
 
-        // A submission that never got going (e.g. the worker was down) shouldn't hold credits forever.
+        // Don't keep credits held forever if a submission never got going.
         Generation::query()
             ->where('status', GenerationStatus::Submitting)
             ->where('created_at', '<', now()->subMinutes(30))

@@ -6,10 +6,6 @@ use App\Services\Pixelforge\PixelforgeClient;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-/**
- * Mirrors Pixelforge's own rules so a bad request is caught here, before any
- * credits are held. Sizes and qualities come from GET /v1/pricing.
- */
 class GenerationRequest extends FormRequest
 {
     public const MAX_PROMPT_CHARACTERS = 4000;

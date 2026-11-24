@@ -4,12 +4,8 @@ namespace App\Services\Pixelforge;
 
 use RuntimeException;
 
-/**
- * A Pixelforge API error, carrying the documented error code so callers can branch on it.
- */
 class PixelforgeException extends RuntimeException
 {
-    /** Errors where nothing was created and trying again later can succeed. */
     private const RETRYABLE = [
         'rate_limit_exceeded',
         'concurrency_limit_exceeded',

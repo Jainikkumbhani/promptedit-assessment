@@ -6,11 +6,8 @@ use InvalidArgumentException;
 use JsonSerializable;
 
 /**
- * An exact amount of US dollars, held as integer nanodollars (1 USD = 1,000,000,000).
- *
- * Pixelforge prices are exact decimals with nine places ("0.046125000"), so nine
- * decimal places is precisely enough to represent every amount it can bill, and
- * integers never drift the way floats do.
+ * USD stored as integer nanodollars. Pixelforge bills with 9 decimal places,
+ * so this is exact and avoids float drift.
  */
 final readonly class Money implements JsonSerializable
 {
@@ -28,10 +25,7 @@ final readonly class Money implements JsonSerializable
         return new self(0);
     }
 
-    /**
-     * Parse an exact decimal dollar string such as "0.046125000" or "5".
-     * Refuses anything with more than nine decimal places rather than silently rounding.
-     */
+    // Throws instead of rounding if there are more than 9 decimals.
     public static function fromDecimal(string $dollars): self
     {
         if (! preg_match('/^(-)?(\d+)(?:\.(\d{1,9}))?$/', trim($dollars), $m)) {
@@ -58,10 +52,7 @@ final readonly class Money implements JsonSerializable
         return new self(-$this->nanos);
     }
 
-    /**
-     * Add a whole-percent markup, rounding any fraction of a nanodollar UP so we
-     * never undercharge. (25% of a nanodollar amount can leave at most 0.75 nanodollars.)
-     */
+    // Rounds up so we never undercharge (max 0.75 nanodollar).
     public function withMarkup(int $percent): self
     {
         $numerator = $this->nanos * (100 + $percent);
@@ -84,7 +75,6 @@ final readonly class Money implements JsonSerializable
         return $this->nanos < $other->nanos;
     }
 
-    /** Exact nine-place decimal string, the same format Pixelforge uses ("0.046125000"). */
     public function toDecimal(): string
     {
         $abs = abs($this->nanos);

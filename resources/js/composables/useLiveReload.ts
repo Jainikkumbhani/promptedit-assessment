@@ -1,10 +1,7 @@
 import { router } from '@inertiajs/vue3';
 import { onBeforeUnmount, watch, type Ref } from 'vue';
 
-/**
- * While something is still in flight, quietly reload just the given props.
- * Stops on its own once everything has settled, and pauses in background tabs.
- */
+// Reload some props every few seconds while `active` is true.
 export function useLiveReload(active: Ref<boolean>, only: string[], intervalMs = 2500) {
     let timer: ReturnType<typeof setTimeout> | undefined;
 

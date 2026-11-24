@@ -2,10 +2,7 @@
 
 namespace App\Services\Pixelforge;
 
-/**
- * Verifies "Pixelforge-Signature: t=<unix>,v1=<hex hmac>", where the HMAC-SHA256
- * is over "<t>.<raw body>" with the key's signing secret.
- */
+// Pixelforge-Signature: t=<unix>,v1=hmac_sha256("<t>.<body>", secret)
 class WebhookSignature
 {
     public function __construct(
@@ -32,7 +29,7 @@ class WebhookSignature
             return false;
         }
 
-        // Old (or far-future) timestamps are rejected so a captured request can't be replayed.
+        // replay protection
         if (abs(($now ?? time()) - $timestamp) > $this->toleranceSeconds) {
             return false;
         }
@@ -42,7 +39,7 @@ class WebhookSignature
         return hash_equals($expected, $signature);
     }
 
-    /** Builds a header the way Pixelforge does. Used by tests. */
+    // used in tests
     public function sign(string $rawBody, int $timestamp): string
     {
         return "t={$timestamp},v1=".hash_hmac('sha256', "{$timestamp}.{$rawBody}", (string) $this->secret);

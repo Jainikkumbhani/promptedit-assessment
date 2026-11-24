@@ -37,7 +37,7 @@ class CreditController
         ]);
     }
 
-    /** A fake purchase: no payment, the credits are simply added. */
+    // Fake purchase, no payment.
     public function store(Request $request, CreditLedger $ledger): RedirectResponse
     {
         $validated = $request->validate([

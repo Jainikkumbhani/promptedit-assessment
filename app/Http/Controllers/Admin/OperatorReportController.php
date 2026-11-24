@@ -15,11 +15,7 @@ use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/**
- * Credit spend, provider cost and profit per UTC day and user, reconciled against
- * Pixelforge's own GET /v1/usage. Like Pixelforge, a generation counts on the UTC
- * day it completed.
- */
+// Grouped by the UTC day a generation completed, same as Pixelforge's /v1/usage.
 class OperatorReportController
 {
     private const MAX_DAYS = 92;
